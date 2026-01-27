@@ -261,7 +261,7 @@ jobs:
           command: |
             apk add --update --no-cache py3-pip gcc g++ make libffi-dev openssl-dev
             cd tests/functional
-            pip3 install -r requirments.txt
+            pip3 install -r requirments.txt --break-system-packages
             pytest
       - store_artifacts:
           path: /artifacts/linux-amd64-alpine.bin
@@ -273,7 +273,7 @@ jobs:
 
   docker-image-build:
     machine:
-      image: ubuntu-2004:202201-02
+      image: ubuntu-2404:2025.09.1
     steps:
       - checkout
       - run:
@@ -286,8 +286,10 @@ jobs:
             docker version
             docker buildx version
             docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-            docker context create xbuilder
-            docker buildx create xbuilder --name xbuilder --use
+      
+            # Create builder if it doesn't exist, otherwise reuse it
+            docker buildx inspect xbuilder >/dev/null 2>&1 || docker buildx create --name xbuilder --use
+            docker buildx use xbuilder
             docker buildx inspect --bootstrap
       - run:
           name: Build local-kms image
@@ -298,7 +300,7 @@ jobs:
 
   docker-image-test-amd64:
     machine:
-      image: ubuntu-2004:202201-02
+      image: ubuntu-2404:2025.09.1
     steps:
       - checkout
       - run:
@@ -322,7 +324,7 @@ jobs:
 
   docker-image-test-arm64:
     machine:
-      image: ubuntu-2004:202201-02
+      image: ubuntu-2404:2025.09.1
     resource_class: arm.medium
     steps:
       - checkout
