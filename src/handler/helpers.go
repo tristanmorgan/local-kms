@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 	"github.com/nsmithuk/local-kms/src/config"
+	"github.com/nsmithuk/local-kms/src/data"
 )
 
 /*
@@ -35,7 +37,18 @@ func (r *RequestHandler) getKey(keyId string) (cmk.Key, Response) {
 	// Lookup the key
 	keyId = config.EnsureArn("key/", keyId)
 
-	key, _ := r.database.LoadKey(keyId)
+	key, err := r.database.LoadKey(keyId)
+	if err != nil {
+		if errors.As(err, &data.KeyNotFoundError) {
+			msg := fmt.Sprintf("Key '%s' does not exist", keyId)
+			r.logger.Warnf(msg)
+
+			return nil, NewNotFoundExceptionResponse(msg)
+		}
+		msg := fmt.Sprintf("Unable to load key '%s'", err)
+		r.logger.Warnf(msg)
+		return nil, NewKMSInvalidStateExceptionResponse(msg)
+	}
 
 	if key == nil {
 		msg := fmt.Sprintf("Key '%s' does not exist", keyId)

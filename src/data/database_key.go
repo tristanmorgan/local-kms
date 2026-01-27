@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
+
+var KeyNotFoundError *keyNotFoundError
 
 func (d *Database) SaveKey(k cmk.Key) error {
 	encoded, err := json.Marshal(k)
@@ -25,6 +28,9 @@ func (d *Database) LoadKey(arn string) (cmk.Key, error) {
 	encoded, err := d.database.Get([]byte(arn), nil)
 
 	if err != nil {
+		if errors.Is(err, leveldb.ErrNotFound) {
+			return nil, &keyNotFoundError{keyId: arn}
+		}
 		return nil, err
 	}
 
@@ -44,6 +50,8 @@ func (d *Database) LoadKey(arn string) (cmk.Key, error) {
 			d.SaveKey(k)
 		}
 
+		key = k
+	case *cmk.HmacKey:
 		key = k
 	case *cmk.EccKey:
 		// This section/switch isn't really needed?
@@ -164,6 +172,8 @@ func unmarshalKey(encoded []byte) (cmk.Key, error) {
 	switch kt.Type {
 	case cmk.TypeAes:
 		key = new(cmk.AesKey)
+	case cmk.TypeHmac:
+		key = new(cmk.HmacKey)
 	case cmk.TypeEcc:
 		key = new(cmk.EccKey)
 	case cmk.TypeRsa:
@@ -175,4 +185,14 @@ func unmarshalKey(encoded []byte) (cmk.Key, error) {
 	err = json.Unmarshal(encoded, &key)
 
 	return key, err
+}
+
+//------------------------------------
+
+type keyNotFoundError struct {
+	keyId string
+}
+
+func (e *keyNotFoundError) Error() string {
+	return fmt.Sprintf("Key '%s' does not exist", e.keyId)
 }
