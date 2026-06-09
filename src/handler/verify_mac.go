@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 )
 
@@ -36,7 +36,7 @@ func (r *RequestHandler) VerifyMac() Response {
 		return NewValidationExceptionResponse(msg)
 	}
 
-	if body.MacAlgorithm == nil {
+	if body.MacAlgorithm == "" {
 		msg := "1 validation error detected: Value null at 'macAlgorithm' failed to satisfy constraint: Member must not be null"
 		r.logger.Warnf(msg)
 		return NewValidationExceptionResponse(msg)
@@ -68,7 +68,7 @@ func (r *RequestHandler) VerifyMac() Response {
 	supportedAlgorithms := key.GetMetadata().SigningAlgorithms
 	algorithmSupported := false
 	for _, alg := range supportedAlgorithms {
-		if string(alg) == *body.MacAlgorithm {
+		if string(alg) == string(body.MacAlgorithm) {
 			algorithmSupported = true
 			break
 		}
@@ -91,7 +91,7 @@ func (r *RequestHandler) VerifyMac() Response {
 
 	//---
 
-	macValid, err := macKey.VerifyMac(body.Message, body.Mac, cmk.SigningAlgorithm(*body.MacAlgorithm))
+	macValid, err := macKey.VerifyMac(body.Message, body.Mac, cmk.SigningAlgorithm(body.MacAlgorithm))
 	if err != nil {
 		r.logger.Error(err)
 		return NewInternalFailureExceptionResponse(err.Error())
@@ -100,11 +100,11 @@ func (r *RequestHandler) VerifyMac() Response {
 	//---
 
 	keyArn := key.GetArn()
-	r.logger.Infof("MAC verification performed using key %s with algorithm %s, result: %v", keyArn, *body.MacAlgorithm, macValid)
+	r.logger.Infof("MAC verification performed using key %s with algorithm %s, result: %v", keyArn, body.MacAlgorithm, macValid)
 
 	return NewResponse(200, &kms.VerifyMacOutput{
 		KeyId:        &keyArn,
-		MacValid:     &macValid,
+		MacValid:     macValid,
 		MacAlgorithm: body.MacAlgorithm,
 	})
 }

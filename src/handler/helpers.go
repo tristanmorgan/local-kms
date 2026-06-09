@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/nsmithuk/local-kms/src/cmk"
 	"github.com/nsmithuk/local-kms/src/config"
 	"github.com/nsmithuk/local-kms/src/data"
 )
 
 /*
-	Finds a key for a given key or alias name or ARN
+Finds a key for a given key or alias name or ARN
 */
 func (r *RequestHandler) getKey(keyId string) (cmk.Key, Response) {
 
@@ -61,8 +61,8 @@ func (r *RequestHandler) getKey(keyId string) (cmk.Key, Response) {
 }
 
 /*
-	Finds a key for a given key or alias name or ARN
-	And confirms that it's available to use for cryptographic operations.
+Finds a key for a given key or alias name or ARN
+And confirms that it's available to use for cryptographic operations.
 */
 func (r *RequestHandler) getUsableKey(keyId string) (cmk.Key, Response) {
 
@@ -100,8 +100,8 @@ func (r *RequestHandler) getUsableKey(keyId string) (cmk.Key, Response) {
 	return key, Response{}
 }
 
-func (r *RequestHandler) validateTags(tags []*kms.Tag) Response {
-	if tags != nil && len(tags) > 0 {
+func (r *RequestHandler) validateTags(tags []types.Tag) Response {
+	if len(tags) > 0 {
 		for i, kv := range tags {
 
 			if len(*kv.TagKey) < 1 {

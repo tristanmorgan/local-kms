@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 )
 
@@ -53,8 +53,8 @@ func (r *RequestHandler) UntagResource() Response {
 
 	if len(body.TagKeys) > 0 {
 		for _, k := range body.TagKeys {
-			err = r.database.DeleteObject(key.GetArn() + "/tag/" + *k)
-			r.logger.Infof("Tag deleted: %s\n", *k)
+			err = r.database.DeleteObject(key.GetArn() + "/tag/" + k)
+			r.logger.Infof("Tag deleted: %s\n", k)
 		}
 	}
 

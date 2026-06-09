@@ -7,7 +7,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/nsmithuk/local-kms/src/cmk"
 	"github.com/nsmithuk/local-kms/src/x509"
@@ -54,7 +54,7 @@ func (r *RequestHandler) generateDataKeyPair() (Response, *GenerateDataKeyPairRe
 		return NewMissingParameterResponse(msg), nil
 	}
 
-	if body.KeyPairSpec == nil {
+	if body.KeyPairSpec == "" {
 		msg := "1 validation error detected: KeyPairSpec is required."
 
 		r.logger.Warnf(msg)
@@ -72,7 +72,7 @@ func (r *RequestHandler) generateDataKeyPair() (Response, *GenerateDataKeyPairRe
 
 	//----------------------------------
 
-	keyPairSpec := cmk.KeySpec(*body.KeyPairSpec)
+	keyPairSpec := cmk.KeySpec(body.KeyPairSpec)
 
 	var publicKey interface{}
 	var privateKey interface{}
@@ -149,12 +149,18 @@ func (r *RequestHandler) generateDataKeyPair() (Response, *GenerateDataKeyPairRe
 
 	//---
 
+	encryptionContext := make(map[string]*string, len(body.EncryptionContext))
+	for k, v := range body.EncryptionContext {
+		value := v
+		encryptionContext[k] = &value
+	}
+
 	var cipherResponse []byte
 
 	switch k := key.(type) {
 	case *cmk.AesKey:
 
-		cipherResponse, err = k.EncryptAndPackage(private, body.EncryptionContext)
+		cipherResponse, err = k.EncryptAndPackage(private, encryptionContext)
 		if err != nil {
 			r.logger.Error(err.Error())
 			return NewInternalFailureExceptionResponse(err.Error()), nil

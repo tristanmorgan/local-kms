@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 	"github.com/nsmithuk/local-kms/src/config"
 )
@@ -31,7 +31,7 @@ func (r *RequestHandler) ScheduleKeyDeletion() Response {
 	var PendingWindowInDays int64
 
 	if body.PendingWindowInDays != nil {
-		PendingWindowInDays = *body.PendingWindowInDays
+		PendingWindowInDays = int64(*body.PendingWindowInDays)
 
 		if PendingWindowInDays < 7 || PendingWindowInDays > 30 {
 			msg := fmt.Sprintf("1 validation error detected: Value '%d' at 'PendingWindowInDays' failed to satisfy "+

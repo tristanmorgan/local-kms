@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 )
 
@@ -41,9 +41,14 @@ func (r *RequestHandler) Encrypt() Response {
 		return NewValidationExceptionResponse(msg)
 	}
 
-	if body.EncryptionAlgorithm == nil {
-		d := "SYMMETRIC_DEFAULT"
-		body.EncryptionAlgorithm = &d
+	if body.EncryptionAlgorithm == "" {
+		body.EncryptionAlgorithm = "SYMMETRIC_DEFAULT"
+	}
+
+	encryptionContext := make(map[string]*string, len(body.EncryptionContext))
+	for k, v := range body.EncryptionContext {
+		value := v
+		encryptionContext[k] = &value
 	}
 
 	//----------------------------------
@@ -62,7 +67,7 @@ func (r *RequestHandler) Encrypt() Response {
 	switch k := key.(type) {
 	case *cmk.AesKey:
 
-		cipherResponse, err = k.EncryptAndPackage(body.Plaintext, body.EncryptionContext)
+		cipherResponse, err = k.EncryptAndPackage(body.Plaintext, encryptionContext)
 		if err != nil {
 			r.logger.Error(err.Error())
 			return NewInternalFailureExceptionResponse(err.Error())
@@ -76,7 +81,7 @@ func (r *RequestHandler) Encrypt() Response {
 			return NewInvalidKeyUsageException(msg)
 		}
 
-		cipherResponse, err = k.Encrypt(body.Plaintext, cmk.EncryptionAlgorithm(*body.EncryptionAlgorithm))
+		cipherResponse, err = k.Encrypt(body.Plaintext, cmk.EncryptionAlgorithm(body.EncryptionAlgorithm))
 		if err != nil {
 			r.logger.Error(err.Error())
 			return NewInternalFailureExceptionResponse(err.Error())
@@ -104,6 +109,6 @@ func (r *RequestHandler) Encrypt() Response {
 	}{
 		KeyId:               key.GetArn(),
 		CiphertextBlob:      cipherResponse,
-		EncryptionAlgorithm: cmk.EncryptionAlgorithm(*body.EncryptionAlgorithm),
+		EncryptionAlgorithm: cmk.EncryptionAlgorithm(body.EncryptionAlgorithm),
 	})
 }

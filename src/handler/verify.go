@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 )
 
@@ -47,21 +47,20 @@ func (r *RequestHandler) Verify() Response {
 		return NewValidationExceptionResponse(msg)
 	}
 
-	if body.SigningAlgorithm == nil {
+	if body.SigningAlgorithm == "" {
 		msg := "1 validation error detected: Value null at 'SigningAlgorithm' failed to satisfy constraint: Member must not be null"
 
 		r.logger.Warnf(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
-	if body.MessageType == nil {
-		d := "RAW"
-		body.MessageType = &d
+	if body.MessageType == "" {
+		body.MessageType = "RAW"
 	}
 
-	if !(*body.MessageType == "RAW" || *body.MessageType == "DIGEST") {
+	if !(body.MessageType == "RAW" || body.MessageType == "DIGEST") {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'messageType' failed to satisfy "+
-			"constraint: Member must satisfy enum value set: [DIGEST, RAW]", *body.MessageType)
+			"constraint: Member must satisfy enum value set: [DIGEST, RAW]", body.MessageType)
 
 		r.logger.Warnf(msg)
 		return NewValidationExceptionResponse(msg)
@@ -108,10 +107,10 @@ func (r *RequestHandler) Verify() Response {
 
 	var valid bool
 
-	if *body.MessageType == "DIGEST" {
-		valid, err = signingKey.Verify(body.Signature, body.Message, cmk.SigningAlgorithm(*body.SigningAlgorithm))
+	if body.MessageType == "DIGEST" {
+		valid, err = signingKey.Verify(body.Signature, body.Message, cmk.SigningAlgorithm(body.SigningAlgorithm))
 	} else {
-		valid, err = signingKey.HashAndVerify(body.Signature, body.Message, cmk.SigningAlgorithm(*body.SigningAlgorithm))
+		valid, err = signingKey.HashAndVerify(body.Signature, body.Message, cmk.SigningAlgorithm(body.SigningAlgorithm))
 	}
 
 	if err != nil {
@@ -121,7 +120,7 @@ func (r *RequestHandler) Verify() Response {
 
 	//---
 
-	r.logger.Infof("%s message verification %t with %s, using key %s\n", *body.MessageType, valid, signingKey.GetMetadata().CustomerMasterKeySpec, key.GetArn())
+	r.logger.Infof("%s message verification %t with %s, using key %s\n", body.MessageType, valid, signingKey.GetMetadata().CustomerMasterKeySpec, key.GetArn())
 
 	if !valid {
 		return NewKMSInvalidSignatureException("")
@@ -134,6 +133,6 @@ func (r *RequestHandler) Verify() Response {
 	}{
 		KeyId:            key.GetArn(),
 		SignatureValid:   valid,
-		SigningAlgorithm: cmk.SigningAlgorithm(*body.SigningAlgorithm),
+		SigningAlgorithm: cmk.SigningAlgorithm(body.SigningAlgorithm),
 	})
 }

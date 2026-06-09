@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 )
 
@@ -40,21 +40,20 @@ func (r *RequestHandler) Sign() Response {
 		return NewValidationExceptionResponse(msg)
 	}
 
-	if body.SigningAlgorithm == nil {
+	if body.SigningAlgorithm == "" {
 		msg := "1 validation error detected: Value null at 'SigningAlgorithm' failed to satisfy constraint: Member must not be null"
 
 		r.logger.Warnf(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
-	if body.MessageType == nil {
-		d := "RAW"
-		body.MessageType = &d
+	if body.MessageType == "" {
+		body.MessageType = "RAW"
 	}
 
-	if !(*body.MessageType == "RAW" || *body.MessageType == "DIGEST") {
+	if !(body.MessageType == "RAW" || body.MessageType == "DIGEST") {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'messageType' failed to satisfy "+
-			"constraint: Member must satisfy enum value set: [DIGEST, RAW]", *body.MessageType)
+			"constraint: Member must satisfy enum value set: [DIGEST, RAW]", body.MessageType)
 
 		r.logger.Warnf(msg)
 		return NewValidationExceptionResponse(msg)
@@ -100,23 +99,23 @@ func (r *RequestHandler) Sign() Response {
 
 	var result []byte
 
-	if *body.MessageType == "DIGEST" {
-		result, err = signingKey.Sign(body.Message, cmk.SigningAlgorithm(*body.SigningAlgorithm))
+	if body.MessageType == "DIGEST" {
+		result, err = signingKey.Sign(body.Message, cmk.SigningAlgorithm(body.SigningAlgorithm))
 	} else {
-		result, err = signingKey.HashAndSign(body.Message, cmk.SigningAlgorithm(*body.SigningAlgorithm))
+		result, err = signingKey.HashAndSign(body.Message, cmk.SigningAlgorithm(body.SigningAlgorithm))
 	}
 
 	if err != nil {
 
 		if _, ok := err.(*cmk.InvalidSigningAlgorithm); ok {
-			msg := fmt.Sprintf("Algorithm %s is incompatible with key spec %s.", *body.SigningAlgorithm, key.GetMetadata().CustomerMasterKeySpec)
+			msg := fmt.Sprintf("Algorithm %s is incompatible with key spec %s.", body.SigningAlgorithm, key.GetMetadata().CustomerMasterKeySpec)
 
 			r.logger.Warnf(msg)
 			return NewInvalidKeyUsageException(msg)
 		}
 
 		if _, ok := err.(*cmk.InvalidDigestLength); ok {
-			msg := fmt.Sprintf("Digest is invalid length for algorithm %s.", *body.SigningAlgorithm)
+			msg := fmt.Sprintf("Digest is invalid length for algorithm %s.", body.SigningAlgorithm)
 
 			r.logger.Warnf(msg)
 			return NewValidationExceptionResponse(msg)
@@ -128,7 +127,7 @@ func (r *RequestHandler) Sign() Response {
 
 	//---
 
-	r.logger.Infof("%s message signed with %s, using key %s\n", *body.MessageType, signingKey.GetMetadata().CustomerMasterKeySpec, key.GetArn())
+	r.logger.Infof("%s message signed with %s, using key %s\n", body.MessageType, signingKey.GetMetadata().CustomerMasterKeySpec, key.GetArn())
 
 	return NewResponse(200, &struct {
 		KeyId            string
@@ -137,6 +136,6 @@ func (r *RequestHandler) Sign() Response {
 	}{
 		KeyId:            key.GetArn(),
 		Signature:        result,
-		SigningAlgorithm: cmk.SigningAlgorithm(*body.SigningAlgorithm),
+		SigningAlgorithm: cmk.SigningAlgorithm(body.SigningAlgorithm),
 	})
 }

@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/nsmithuk/local-kms/src/cmk"
 	"github.com/nsmithuk/local-kms/src/service"
 )
@@ -44,9 +44,14 @@ func (r *RequestHandler) Decrypt() Response {
 		return NewValidationExceptionResponse(msg)
 	}
 
-	if body.EncryptionAlgorithm == nil {
-		d := "SYMMETRIC_DEFAULT"
-		body.EncryptionAlgorithm = &d
+	if body.EncryptionAlgorithm == "" {
+		body.EncryptionAlgorithm = "SYMMETRIC_DEFAULT"
+	}
+
+	encryptionContext := make(map[string]*string, len(body.EncryptionContext))
+	for k, v := range body.EncryptionContext {
+		value := v
+		encryptionContext[k] = &value
 	}
 
 	//--------------------------------
@@ -110,7 +115,7 @@ func (r *RequestHandler) Decrypt() Response {
 	switch k := key.(type) {
 	case *cmk.AesKey:
 
-		plaintext, err = k.Decrypt(keyVersion, ciphertext, body.EncryptionContext)
+		plaintext, err = k.Decrypt(keyVersion, ciphertext, encryptionContext)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to decode Ciphertext: %s", err)
 			r.logger.Warnf(msg)
@@ -120,7 +125,7 @@ func (r *RequestHandler) Decrypt() Response {
 
 	case *cmk.RsaKey:
 
-		plaintext, err = k.Decrypt(ciphertext, cmk.EncryptionAlgorithm(*body.EncryptionAlgorithm))
+		plaintext, err = k.Decrypt(ciphertext, cmk.EncryptionAlgorithm(body.EncryptionAlgorithm))
 		if err != nil {
 			msg := fmt.Sprintf("Unable to decode Ciphertext: %s", err)
 			r.logger.Warnf(msg)
@@ -143,6 +148,6 @@ func (r *RequestHandler) Decrypt() Response {
 	}{
 		KeyId:               key.GetArn(),
 		Plaintext:           plaintext,
-		EncryptionAlgorithm: cmk.EncryptionAlgorithm(*body.EncryptionAlgorithm),
+		EncryptionAlgorithm: cmk.EncryptionAlgorithm(body.EncryptionAlgorithm),
 	})
 }
