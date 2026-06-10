@@ -43,7 +43,7 @@ func (r *RequestHandler) CreateKey() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'description' failed to satisfy "+
 			"constraint: Member must have length less than or equal to 8192", *body.Description)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -51,7 +51,7 @@ func (r *RequestHandler) CreateKey() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'policy' failed to satisfy "+
 			"constraint: Member must have length less than or equal to 32768", *body.Policy)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -84,7 +84,7 @@ func (r *RequestHandler) CreateKey() Response {
 	if body.KeySpec != "" && body.CustomerMasterKeySpec != "" {
 		// Both values cannot be set
 		msg := fmt.Sprintf("You cannot specify KeySpec and CustomerMasterKeySpec in the same request. CustomerMasterKeySpec is deprecated.")
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	} else if body.KeySpec == "" && body.CustomerMasterKeySpec != "" {
 		// If we only have CustomerMasterKeySpec, copy it over to KeySpec
@@ -102,7 +102,7 @@ func (r *RequestHandler) CreateKey() Response {
 			if body.KeySpec != types.KeySpecSymmetricDefault {
 				msg := fmt.Sprintf("KeySpec %s is not supported for Origin %s", body.KeySpec, body.Origin)
 
-				r.logger.Warnf(msg)
+				r.logger.Warn(msg)
 				return NewValidationExceptionResponse(msg)
 			}
 
@@ -113,13 +113,13 @@ func (r *RequestHandler) CreateKey() Response {
 
 		case types.OriginTypeAwsCloudhsm:
 			msg := fmt.Sprintf("Local KMS does not yet support Origin AWS_CLOUDHSM.")
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewUnsupportedOperationException(msg)
 
 		default:
 			msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'origin' failed to satisfy constraint: Member must satisfy enum value set: [EXTERNAL, AWS_CLOUDHSM, AWS_KMS]", body.Origin)
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 	}
@@ -133,7 +133,7 @@ func (r *RequestHandler) CreateKey() Response {
 
 		if body.KeyUsage != "" && body.KeyUsage != types.KeyUsageTypeEncryptDecrypt {
 			msg := fmt.Sprintf("The operation failed because the KeyUsage value of the CMK is %s. To perform this operation, the KeyUsage value must be ENCRYPT_DECRYPT.", body.KeyUsage)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 
@@ -143,13 +143,13 @@ func (r *RequestHandler) CreateKey() Response {
 
 		if body.KeyUsage == "" {
 			msg := fmt.Sprintf("You must specify a KeyUsage value for an asymmetric CMK.")
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 
 		if body.KeyUsage != types.KeyUsageTypeSignVerify {
 			msg := fmt.Sprintf("KeyUsage ENCRYPT_DECRYPT is not compatible with KeySpec %s", body.KeySpec)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 
@@ -163,13 +163,13 @@ func (r *RequestHandler) CreateKey() Response {
 
 		if body.KeyUsage == "" {
 			msg := fmt.Sprintf("You must specify a KeyUsage value for an asymmetric CMK.")
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 
 		if !(body.KeyUsage == types.KeyUsageTypeSignVerify || body.KeyUsage == types.KeyUsageTypeEncryptDecrypt) {
 			msg := fmt.Sprintf("KeyUsage %s is not compatible with KeySpec %s", body.KeyUsage, body.KeySpec)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 
@@ -183,13 +183,13 @@ func (r *RequestHandler) CreateKey() Response {
 
 		if body.KeyUsage == "" {
 			msg := fmt.Sprintf("You must specify a KeyUsage value for an HMAC CMK.")
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 
 		if body.KeyUsage != types.KeyUsageTypeGenerateVerifyMac {
 			msg := fmt.Sprintf("KeyUsage %s is not compatible with KeySpec %s", body.KeyUsage, body.KeySpec)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 
@@ -206,7 +206,7 @@ func (r *RequestHandler) CreateKey() Response {
 			"ECC_NIST_P256, ECC_NIST_P521, RSA_3072, ECC_SECG_P256K1, RSA_4096, SYMMETRIC_DEFAULT, "+
 			"HMAC_224, HMAC_256, HMAC_384, HMAC_512]", body.KeySpec)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 
 		return NewValidationExceptionResponse(msg)
 	}

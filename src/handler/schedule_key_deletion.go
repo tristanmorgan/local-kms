@@ -24,7 +24,7 @@ func (r *RequestHandler) ScheduleKeyDeletion() Response {
 	if body.KeyId == nil {
 		msg := "KeyId is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
@@ -37,7 +37,7 @@ func (r *RequestHandler) ScheduleKeyDeletion() Response {
 			msg := fmt.Sprintf("1 validation error detected: Value '%d' at 'PendingWindowInDays' failed to satisfy "+
 				"constraint: Member must have minimum value of 7 and maximum value of 30.", *body.PendingWindowInDays)
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 	} else {
@@ -54,7 +54,7 @@ func (r *RequestHandler) ScheduleKeyDeletion() Response {
 	if key == nil {
 		msg := fmt.Sprintf("Key '%s' does not exist", target)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewNotFoundExceptionResponse(msg)
 	}
 
@@ -64,7 +64,7 @@ func (r *RequestHandler) ScheduleKeyDeletion() Response {
 		// Key is pending deletion; cannot re-schedule
 		msg := fmt.Sprintf("%s is pending deletion.", target)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 	}
 

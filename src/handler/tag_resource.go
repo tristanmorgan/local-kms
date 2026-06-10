@@ -23,14 +23,14 @@ func (r *RequestHandler) TagResource() Response {
 	if body.KeyId == nil {
 		msg := "1 validation error detected: Value null at 'keyId' failed to satisfy constraint: Member must not be null"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.Tags == nil {
 		msg := "1 validation error detected: Value null at 'tags' failed to satisfy constraint: Member must not be null"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -50,7 +50,7 @@ func (r *RequestHandler) TagResource() Response {
 	case cmk.KeyStatePendingDeletion:
 		msg := fmt.Sprintf("%s is pending deletion.", *body.KeyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 
 	}

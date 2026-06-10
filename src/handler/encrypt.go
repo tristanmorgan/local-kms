@@ -21,7 +21,7 @@ func (r *RequestHandler) Encrypt() Response {
 	if body.KeyId == nil {
 		msg := "KeyId is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
@@ -29,7 +29,7 @@ func (r *RequestHandler) Encrypt() Response {
 		msg := "1 validation error detected: Value at 'plaintext' failed to satisfy constraint: Member must have " +
 			"length greater than or equal to 1"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -37,7 +37,7 @@ func (r *RequestHandler) Encrypt() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'Plaintext' failed to satisfy "+
 			"constraint: Member must have minimum length of 1 and maximum length of 4096.", string(body.Plaintext))
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -77,7 +77,7 @@ func (r *RequestHandler) Encrypt() Response {
 
 		if k.GetMetadata().KeyUsage != cmk.UsageEncryptDecrypt {
 			msg := fmt.Sprintf("%s key usage is %s which is not valid for Encrypt.", k.GetArn(), k.GetMetadata().KeyUsage)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewInvalidKeyUsageException(msg)
 		}
 
@@ -91,7 +91,7 @@ func (r *RequestHandler) Encrypt() Response {
 
 		if k.GetMetadata().KeyUsage == cmk.UsageSignVerify {
 			msg := fmt.Sprintf("%s key usage is SIGN_VERIFY which is not valid for Encrypt.", k.GetArn())
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewInvalidKeyUsageException(msg)
 		}
 

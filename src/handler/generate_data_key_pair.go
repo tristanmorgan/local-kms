@@ -50,14 +50,14 @@ func (r *RequestHandler) generateDataKeyPair() (Response, *GenerateDataKeyPairRe
 	if body.KeyId == nil {
 		msg := "KeyId is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg), nil
 	}
 
 	if body.KeyPairSpec == "" {
 		msg := "1 validation error detected: KeyPairSpec is required."
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg), nil
 	}
 
@@ -133,7 +133,7 @@ func (r *RequestHandler) generateDataKeyPair() (Response, *GenerateDataKeyPairRe
 
 	default:
 		msg := "1 validation error detected: KeyPairSpec is invalid."
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg), nil
 	}
 
@@ -170,12 +170,12 @@ func (r *RequestHandler) generateDataKeyPair() (Response, *GenerateDataKeyPairRe
 
 		if k.GetMetadata().KeyUsage == cmk.UsageSignVerify {
 			msg := fmt.Sprintf("%s key usage is %s which is not valid for GenerateDataKeyPair.", k.GetArn(), k.GetMetadata().KeyUsage)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewInvalidKeyUsageException(msg), nil
 		}
 
 		msg := fmt.Sprintf("%s key KeySpec is %s which is not valid for GenerateDataKeyPair.", k.GetArn(), k.GetMetadata().CustomerMasterKeySpec)
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewInvalidKeyUsageException(msg), nil
 	}
 

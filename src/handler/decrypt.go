@@ -32,7 +32,7 @@ func (r *RequestHandler) Decrypt() Response {
 		msg := "1 validation error detected: Value at 'ciphertextBlob' failed to satisfy constraint: Member must " +
 			"have length greater than or equal to 1"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -40,7 +40,7 @@ func (r *RequestHandler) Decrypt() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'CiphertextBlob' failed to satisfy "+
 			"constraint: Member must have length minimum length of 1 and maximum length of 6144.", string(body.CiphertextBlob))
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -118,7 +118,7 @@ func (r *RequestHandler) Decrypt() Response {
 		plaintext, err = k.Decrypt(keyVersion, ciphertext, encryptionContext)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to decode Ciphertext: %s", err)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 
 			return NewInvalidCiphertextExceptionResponse("")
 		}
@@ -128,7 +128,7 @@ func (r *RequestHandler) Decrypt() Response {
 		plaintext, err = k.Decrypt(ciphertext, cmk.EncryptionAlgorithm(body.EncryptionAlgorithm))
 		if err != nil {
 			msg := fmt.Sprintf("Unable to decode Ciphertext: %s", err)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 
 			return NewInvalidCiphertextExceptionResponse("")
 		}

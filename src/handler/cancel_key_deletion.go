@@ -23,7 +23,7 @@ func (r *RequestHandler) CancelKeyDeletion() Response {
 	if body.KeyId == nil {
 		msg := "KeyId is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
@@ -37,7 +37,7 @@ func (r *RequestHandler) CancelKeyDeletion() Response {
 	if key == nil {
 		msg := fmt.Sprintf("Key '%s' does not exist", target)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewNotFoundExceptionResponse(msg)
 	}
 
@@ -47,7 +47,7 @@ func (r *RequestHandler) CancelKeyDeletion() Response {
 		// Key is pending deletion; cannot re-schedule
 		msg := fmt.Sprintf("%s is not pending deletion.", target)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 	}
 

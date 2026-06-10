@@ -21,14 +21,14 @@ func (r *RequestHandler) Sign() Response {
 	if body.KeyId == nil {
 		msg := "1 validation error detected: Value null at 'keyId' failed to satisfy constraint: Member must not be null"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.Message == nil {
 		msg := "1 validation error detected: Value null at 'Message' failed to satisfy constraint: Member must not be null"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -36,14 +36,14 @@ func (r *RequestHandler) Sign() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'Message' failed to satisfy "+
 			"constraint: Member must have minimum length of 1 and maximum length of 4096.", string(body.Message))
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.SigningAlgorithm == "" {
 		msg := "1 validation error detected: Value null at 'SigningAlgorithm' failed to satisfy constraint: Member must not be null"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -55,7 +55,7 @@ func (r *RequestHandler) Sign() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'messageType' failed to satisfy "+
 			"constraint: Member must satisfy enum value set: [DIGEST, RAW]", body.MessageType)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -75,7 +75,7 @@ func (r *RequestHandler) Sign() Response {
 
 		if k.GetMetadata().KeyUsage == cmk.UsageEncryptDecrypt {
 			msg := fmt.Sprintf("%s key usage is ENCRYPT_DECRYPT which is not valid for signing.", k.GetArn())
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewInvalidKeyUsageException(msg)
 		}
 
@@ -84,14 +84,14 @@ func (r *RequestHandler) Sign() Response {
 
 		if k.GetMetadata().KeyUsage == cmk.UsageEncryptDecrypt {
 			msg := fmt.Sprintf("%s key usage is ENCRYPT_DECRYPT which is not valid for signing.", k.GetArn())
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewInvalidKeyUsageException(msg)
 		}
 
 		signingKey = k
 	default:
 		msg := fmt.Sprintf("%s key usage is ENCRYPT_DECRYPT which is not valid for Sign.", k.GetArn())
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewInvalidKeyUsageException(msg)
 	}
 
@@ -110,14 +110,14 @@ func (r *RequestHandler) Sign() Response {
 		if _, ok := err.(*cmk.InvalidSigningAlgorithm); ok {
 			msg := fmt.Sprintf("Algorithm %s is incompatible with key spec %s.", body.SigningAlgorithm, key.GetMetadata().CustomerMasterKeySpec)
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewInvalidKeyUsageException(msg)
 		}
 
 		if _, ok := err.(*cmk.InvalidDigestLength); ok {
 			msg := fmt.Sprintf("Digest is invalid length for algorithm %s.", body.SigningAlgorithm)
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg)
 		}
 

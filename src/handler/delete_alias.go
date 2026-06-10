@@ -22,7 +22,7 @@ func (r *RequestHandler) DeleteAlias() Response {
 	if body.AliasName == nil {
 		msg := "AliasName is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
@@ -30,7 +30,7 @@ func (r *RequestHandler) DeleteAlias() Response {
 		msg := "Alias must start with the prefix \"alias/\". Please see " +
 			"http://docs.aws.amazon.com/kms/latest/developerguide/programming-aliases.html"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -48,7 +48,7 @@ func (r *RequestHandler) DeleteAlias() Response {
 	if err != nil {
 		msg := fmt.Sprintf("Alias '%s' does not exist", aliasArn)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewNotFoundExceptionResponse(msg)
 	}
 

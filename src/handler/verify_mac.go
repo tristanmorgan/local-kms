@@ -20,25 +20,25 @@ func (r *RequestHandler) VerifyMac() Response {
 
 	if body.KeyId == nil {
 		msg := "1 validation error detected: Value null at 'keyId' failed to satisfy constraint: Member must not be null"
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.Message == nil {
 		msg := "1 validation error detected: Value null at 'message' failed to satisfy constraint: Member must not be null"
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.Mac == nil {
 		msg := "1 validation error detected: Value null at 'mac' failed to satisfy constraint: Member must not be null"
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.MacAlgorithm == "" {
 		msg := "1 validation error detected: Value null at 'macAlgorithm' failed to satisfy constraint: Member must not be null"
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -58,7 +58,7 @@ func (r *RequestHandler) VerifyMac() Response {
 
 	if key.GetKeyType() != cmk.TypeHmac {
 		msg := fmt.Sprintf("The key usage %s is not valid for this operation.", key.GetMetadata().KeyUsage)
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -76,7 +76,7 @@ func (r *RequestHandler) VerifyMac() Response {
 
 	if !algorithmSupported {
 		msg := fmt.Sprintf("The request is not valid for the key spec %s.", key.GetMetadata().KeySpec)
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -85,7 +85,7 @@ func (r *RequestHandler) VerifyMac() Response {
 	macKey, ok := key.(cmk.MacKey)
 	if !ok {
 		msg := "Key does not support MAC operations"
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 

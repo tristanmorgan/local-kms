@@ -36,7 +36,7 @@ func (r *RequestHandler) DeleteImportedKeyMaterial() Response {
 	if key == nil {
 		msg := fmt.Sprintf("Key '%s' does not exist", key.GetArn())
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewNotFoundExceptionResponse(msg)
 	}
 
@@ -48,7 +48,7 @@ func (r *RequestHandler) DeleteImportedKeyMaterial() Response {
 	if keyMetadata.Origin != cmk.KeyOriginExternal {
 		msg := fmt.Sprintf("%s origin is %s which is not valid for this operation.", key.GetArn(), keyMetadata.Origin)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewUnsupportedOperationException(msg)
 	}
 
@@ -56,13 +56,13 @@ func (r *RequestHandler) DeleteImportedKeyMaterial() Response {
 	case cmk.KeyStatePendingDeletion:
 		msg := fmt.Sprintf("%s is pending deletion.", *body.KeyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 
 	case cmk.KeyStateUnavailable:
 		msg := fmt.Sprintf("%s is unavailable.", *body.KeyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 	}
 

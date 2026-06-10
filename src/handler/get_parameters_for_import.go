@@ -35,14 +35,14 @@ func (r *RequestHandler) GetParametersForImport() Response {
 	if body.KeyId == nil {
 		msg := "KeyId is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
 	if body.WrappingAlgorithm == "" {
 		msg := "WrappingAlgorithm is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
@@ -54,14 +54,14 @@ func (r *RequestHandler) GetParametersForImport() Response {
 	default:
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'wrappingAlgorithm' failed to satisfy constraint: Member must satisfy enum value set: [RSAES_OAEP_SHA_1, RSAES_OAEP_SHA_256, RSAES_PKCS1_V1_5]", body.WrappingAlgorithm)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.WrappingKeySpec == "" {
 		msg := "WrappingKeySpec is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
@@ -70,7 +70,7 @@ func (r *RequestHandler) GetParametersForImport() Response {
 	if strings.Compare(string(body.WrappingKeySpec), "RSA_2048") != 0 {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'wrappingKeySpec' failed to satisfy constraint: Member must satisfy enum value set: [RSA_2048]", body.WrappingKeySpec)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -84,7 +84,7 @@ func (r *RequestHandler) GetParametersForImport() Response {
 	if key == nil {
 		msg := fmt.Sprintf("Key '%s' does not exist", key.GetArn())
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewNotFoundExceptionResponse(msg)
 	}
 
@@ -92,7 +92,7 @@ func (r *RequestHandler) GetParametersForImport() Response {
 	if keyMetadata.Origin != "EXTERNAL" {
 		msg := fmt.Sprintf("%s origin is %s which is not valid for this operation.", key.GetArn(), keyMetadata.Origin)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewUnsupportedOperationException(msg)
 	}
 
@@ -100,13 +100,13 @@ func (r *RequestHandler) GetParametersForImport() Response {
 	case cmk.KeyStatePendingDeletion:
 		msg := fmt.Sprintf("%s is pending deletion.", *body.KeyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 
 	case cmk.KeyStateUnavailable:
 		msg := fmt.Sprintf("%s is unavailable.", *body.KeyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 	}
 

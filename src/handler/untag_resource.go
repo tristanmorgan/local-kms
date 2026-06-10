@@ -22,14 +22,14 @@ func (r *RequestHandler) UntagResource() Response {
 	if body.KeyId == nil {
 		msg := "1 validation error detected: Value null at 'keyId' failed to satisfy constraint: Member must not be null"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
 	if body.TagKeys == nil {
 		msg := "1 validation error detected: Value null at 'tagKeys' failed to satisfy constraint: Member must not be null"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -44,7 +44,7 @@ func (r *RequestHandler) UntagResource() Response {
 	case cmk.KeyStatePendingDeletion:
 		msg := fmt.Sprintf("%s is pending deletion.", *body.KeyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewKMSInvalidStateExceptionResponse(msg)
 
 	}
@@ -54,6 +54,9 @@ func (r *RequestHandler) UntagResource() Response {
 	if len(body.TagKeys) > 0 {
 		for _, k := range body.TagKeys {
 			err = r.database.DeleteObject(key.GetArn() + "/tag/" + k)
+			if err != nil {
+				r.logger.Warn(err)
+			}
 			r.logger.Infof("Tag deleted: %s\n", k)
 		}
 	}

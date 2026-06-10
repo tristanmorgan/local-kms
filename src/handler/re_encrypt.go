@@ -22,14 +22,14 @@ func (r *RequestHandler) ReEncrypt() Response {
 	if body.DestinationKeyId == nil {
 		msg := "DestinationKeyId is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
 	if len(body.CiphertextBlob) == 0 {
 		msg := "CiphertextBlob is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg)
 	}
 
@@ -37,7 +37,7 @@ func (r *RequestHandler) ReEncrypt() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'CiphertextBlob' failed to satisfy "+
 			"constraint: Member must have length minimum length of 1 and maximum length of 6144.", string(body.CiphertextBlob))
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -83,7 +83,7 @@ func (r *RequestHandler) ReEncrypt() Response {
 		plaintext, err = k.Decrypt(keySourceVersion, ciphertext, sourceEncryptionContext)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to decode Ciphertext: %s", err)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 
 			return NewInvalidCiphertextExceptionResponse("")
 		}

@@ -50,21 +50,21 @@ func (r *RequestHandler) generateDataKey() (Response, *GenerateDataKeyResponse) 
 	if body.KeyId == nil {
 		msg := "KeyId is a required parameter"
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewMissingParameterResponse(msg), nil
 	}
 
 	if body.NumberOfBytes == nil && body.KeySpec == "" {
 		msg := "1 validation error detected: Either KeySpec or NumberOfBytes is required."
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg), nil
 	}
 
 	if body.NumberOfBytes != nil && body.KeySpec != "" {
 		msg := "1 validation error detected: Both KeySpec and NumberOfBytes cannot be provided."
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg), nil
 	}
 
@@ -72,7 +72,7 @@ func (r *RequestHandler) generateDataKey() (Response, *GenerateDataKeyResponse) 
 		msg := fmt.Sprintf("1 validation error detected: Value '%d' at 'NumberOfBytes' failed to satisfy "+
 			"constraint: Member must have minimum value of 1 and maximum value of 1024.", *body.NumberOfBytes)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg), nil
 	}
 
@@ -88,7 +88,7 @@ func (r *RequestHandler) generateDataKey() (Response, *GenerateDataKeyResponse) 
 			msg := fmt.Sprintf("1 validation error detected: Value '%s' at 'KeySpec' failed to satisfy "+
 				"constraint: Member must be AES_128 or AES_256", body.KeySpec)
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewValidationExceptionResponse(msg), nil
 		}
 
@@ -131,7 +131,7 @@ func (r *RequestHandler) generateDataKey() (Response, *GenerateDataKeyResponse) 
 		if k.GetMetadata().KeyUsage == cmk.UsageSignVerify {
 			msg := fmt.Sprintf("%s key usage is SIGN_VERIFY which is not valid for GenerateDataKey.", k.GetArn())
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewInvalidKeyUsageException(msg), nil
 		}
 

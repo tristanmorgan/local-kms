@@ -34,7 +34,7 @@ func (r *RequestHandler) ListAliases() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%d' at 'limit' failed to satisfy "+
 			"constraint: Minimum value of 1. Maximum value of 100.", limit)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -54,7 +54,7 @@ func (r *RequestHandler) ListAliases() Response {
 		if key == nil {
 			msg := fmt.Sprintf("Key '%s' does not exist", target)
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return NewNotFoundExceptionResponse(msg)
 		}
 

@@ -25,7 +25,7 @@ func (r *RequestHandler) getKey(keyId string) (cmk.Key, Response) {
 		if err != nil {
 			msg := fmt.Sprintf("Alias %s is not found.", config.ArnPrefix()+keyId)
 
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 			return nil, NewNotFoundExceptionResponse(msg)
 		}
 
@@ -41,18 +41,18 @@ func (r *RequestHandler) getKey(keyId string) (cmk.Key, Response) {
 	if err != nil {
 		if errors.As(err, &data.KeyNotFoundError) {
 			msg := fmt.Sprintf("Key '%s' does not exist", keyId)
-			r.logger.Warnf(msg)
+			r.logger.Warn(msg)
 
 			return nil, NewNotFoundExceptionResponse(msg)
 		}
 		msg := fmt.Sprintf("Unable to load key '%s'", err)
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return nil, NewKMSInvalidStateExceptionResponse(msg)
 	}
 
 	if key == nil {
 		msg := fmt.Sprintf("Key '%s' does not exist", keyId)
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 
 		return nil, NewNotFoundExceptionResponse(msg)
 	}
@@ -77,7 +77,7 @@ func (r *RequestHandler) getUsableKey(keyId string) (cmk.Key, Response) {
 		// Key material hasn't been imported
 		msg := fmt.Sprintf("%s is pending import.", keyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return nil, NewKMSInvalidStateExceptionResponse(msg)
 	}
 
@@ -85,7 +85,7 @@ func (r *RequestHandler) getUsableKey(keyId string) (cmk.Key, Response) {
 		// Key is pending deletion; cannot create alias
 		msg := fmt.Sprintf("%s is pending deletion.", keyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return nil, NewKMSInvalidStateExceptionResponse(msg)
 	}
 
@@ -93,7 +93,7 @@ func (r *RequestHandler) getUsableKey(keyId string) (cmk.Key, Response) {
 		// Key is pending deletion; cannot create alias
 		msg := fmt.Sprintf("%s is disabled.", keyId)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return nil, NewDisabledExceptionResponse(msg)
 	}
 
@@ -108,7 +108,7 @@ func (r *RequestHandler) validateTags(tags []types.Tag) Response {
 				msg := fmt.Sprintf("1 validation error detected: Value '' at 'tags.%d.member.tagKey' failed to "+
 					"satisfy constraint: Member must have length greater than or equal to 1", i+1)
 
-				r.logger.Warnf(msg)
+				r.logger.Warn(msg)
 				return NewValidationExceptionResponse(msg)
 			}
 
@@ -116,7 +116,7 @@ func (r *RequestHandler) validateTags(tags []types.Tag) Response {
 				msg := fmt.Sprintf("1 validation error detected: Value '' at 'tags.%d.member.tagKey' failed to "+
 					"satisfy constraint: Member must have length less than or equal to 128", i+1)
 
-				r.logger.Warnf(msg)
+				r.logger.Warn(msg)
 				return NewValidationExceptionResponse(msg)
 			}
 
@@ -124,7 +124,7 @@ func (r *RequestHandler) validateTags(tags []types.Tag) Response {
 				msg := fmt.Sprintf("1 validation error detected: Value '' at 'tags.%d.member.tagValue' failed to "+
 					"satisfy constraint: Member must have length less than or equal to 256", i+1)
 
-				r.logger.Warnf(msg)
+				r.logger.Warn(msg)
 				return NewValidationExceptionResponse(msg)
 			}
 

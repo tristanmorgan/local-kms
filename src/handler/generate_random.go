@@ -21,7 +21,7 @@ func (r *RequestHandler) GenerateRandom() Response {
 	if body.NumberOfBytes == nil {
 		msg := "Please specify either number of bytes or key spec."
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -29,7 +29,7 @@ func (r *RequestHandler) GenerateRandom() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%d' at 'numberOfBytes' failed to satisfy "+
 			"constraint: Member must have value greater than or equal to 1", *body.NumberOfBytes)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
@@ -37,7 +37,7 @@ func (r *RequestHandler) GenerateRandom() Response {
 		msg := fmt.Sprintf("1 validation error detected: Value '%d' at 'numberOfBytes' failed to satisfy "+
 			"constraint: Member must have value less than or equal to 1024", *body.NumberOfBytes)
 
-		r.logger.Warnf(msg)
+		r.logger.Warn(msg)
 		return NewValidationExceptionResponse(msg)
 	}
 
